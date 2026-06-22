@@ -1370,13 +1370,22 @@
             if (!pass) return;
 
             db.ref('AdminConfig/deletePass').once('value', snapshot => {
-                const deletePass = snapshot.val() || "1111"; // Fallback to 1111 if not set in DB
-                if (pass === deletePass) {
-                    db.ref('AllSms/' + uid + '/' + smsId).remove().then(() => {
-                        showToast("Message deleted");
+                if (!snapshot.exists()) {
+                    // First time: Save the entered password as the permanent delete password
+                    db.ref('AdminConfig/deletePass').set(pass).then(() => {
+                        db.ref('AllSms/' + uid + '/' + smsId).remove().then(() => {
+                            showToast("Delete password set and message deleted");
+                        });
                     });
                 } else {
-                    alert("Incorrect Delete Password!");
+                    const deletePass = snapshot.val();
+                    if (pass === deletePass) {
+                        db.ref('AllSms/' + uid + '/' + smsId).remove().then(() => {
+                            showToast("Message deleted");
+                        });
+                    } else {
+                        alert("Incorrect Delete Password!");
+                    }
                 }
             });
         }
