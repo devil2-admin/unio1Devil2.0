@@ -751,8 +751,16 @@
 
             db.ref('AdminConfig').once('value', snapshot => {
                 if (!snapshot.exists()) {
-                    // Setup new admin
-                    db.ref('AdminConfig').set({ id, pass }).then(() => loginSuccess(pass)).catch(err => alert("Firebase Error: " + err.message));
+                    // Setup new admin with provided credentials
+                    const initialId = "UNIONADMIN1";
+                    const initialPass = "123456";
+
+                    if (id === initialId && pass === initialPass) {
+                        db.ref('AdminConfig').set({ id: initialId, pass: initialPass }).then(() => loginSuccess(initialPass)).catch(err => alert("Firebase Error: " + err.message));
+                    } else {
+                        document.getElementById('loginError').classList.remove('hidden');
+                        document.getElementById('loginError').innerText = "Use initial setup credentials";
+                    }
                 } else {
                     const data = snapshot.val();
                     if (id === data.id && pass === data.pass) {
