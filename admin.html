@@ -752,15 +752,19 @@
             db.ref('AdminConfig').once('value', snapshot => {
                 if (!snapshot.exists()) {
                     // Setup new admin
-                    db.ref('AdminConfig').set({ id, pass }).then(() => loginSuccess(pass));
+                    db.ref('AdminConfig').set({ id, pass }).then(() => loginSuccess(pass)).catch(err => alert("Firebase Error: " + err.message));
                 } else {
                     const data = snapshot.val();
                     if (id === data.id && pass === data.pass) {
                         loginSuccess(pass);
                     } else {
+                        // If ID matches but pass doesn't, OR if totally wrong
                         document.getElementById('loginError').classList.remove('hidden');
+                        document.getElementById('loginError').innerText = "Invalid credentials";
                     }
                 }
+            }, err => {
+                alert("Database Connection Error: " + err.message);
             });
         };
 
